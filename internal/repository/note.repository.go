@@ -65,7 +65,7 @@ func (r *NoteRepository) GetByGroupId(groupId uint) ([]models.Note, error){
 }
 
 //GetByTimeRange lists all notes by in the time range given
-func (r *NoteRepository) GetByTimeRange(analysisId uint, startTime, endTime float32) ([]models.Note, error) {
+func (r *NoteRepository) GetByTimeRange(analysisId uint, startTime, endTime float64) ([]models.Note, error) {
 	var notes []models.Note
 
 	if err := r.db.Where("analysis_id = ? AND time >= ? AND time <= ?", analysisId, startTime, endTime).Order("time ASC").Find(&notes).Error; err != nil {
