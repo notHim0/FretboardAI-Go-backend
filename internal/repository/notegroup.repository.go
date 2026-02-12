@@ -13,7 +13,7 @@ type NoteGroupRepository struct {
 }
 
 //creates a new note_group repository
-func NewNoteGroupRepositoryRepositoryRepository(db *gorm.DB) *NoteGroupRepository {
+func NewNoteGroupRepository(db *gorm.DB) *NoteGroupRepository {
 	return &NoteGroupRepository{db: db}
 }
 
