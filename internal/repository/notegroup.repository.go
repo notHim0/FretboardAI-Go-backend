@@ -7,17 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
-//handles database operations for note_group
+// handles database operations for note_group
 type NoteGroupRepository struct {
 	db *gorm.DB
 }
 
-//creates a new note_group repository
+// creates a new note_group repository
 func NewNoteGroupRepository(db *gorm.DB) *NoteGroupRepository {
 	return &NoteGroupRepository{db: db}
 }
 
-//creates a note group
+// creates a note group
 func (r *NoteGroupRepository) Create(group *models.NoteGroup) error {
 	if err := r.db.Create(group).Error; err != nil {
 		return fmt.Errorf("failed to create a note group: %w", err)
@@ -37,17 +37,17 @@ func (r *NoteGroupRepository) CreateBulk(groups []models.NoteGroup) error {
 	if err != nil {
 		return fmt.Errorf("failed to create in batches: %w", err)
 	}
-	
+
 	return nil
 }
 
-//GetById retrieves a note_group with its notes
+// GetById retrieves a note_group with its notes
 func (r *NoteGroupRepository) GetById(id uint) (*models.NoteGroup, error) {
 	var notegroup models.NoteGroup
 
 	if err := r.db.Preload("Notes").Find(&notegroup, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("note group not found: %w",err)
+			return nil, fmt.Errorf("note group not found: %w", err)
 		}
 		return nil, fmt.Errorf("failed to get note groups: %w", err)
 	}
@@ -55,8 +55,7 @@ func (r *NoteGroupRepository) GetById(id uint) (*models.NoteGroup, error) {
 	return &notegroup, nil
 }
 
-
-//GetByAnalysisId retrieves note_groups by analysis id 
+// GetByAnalysisId retrieves note_groups by analysis id
 func (r *NoteGroupRepository) GetByAnalysisId(analysisId uint) ([]models.NoteGroup, error) {
 	var groups []models.NoteGroup
 
@@ -67,7 +66,7 @@ func (r *NoteGroupRepository) GetByAnalysisId(analysisId uint) ([]models.NoteGro
 	return groups, nil
 }
 
-//GetByTimeRange retrieves note group by time range using anaylsis id
+// GetByTimeRange retrieves note group by time range using anaylsis id
 func (r *NoteGroupRepository) GetByTimeRange(analysisId uint, startTime, endTime float64) ([]models.NoteGroup, error) {
 	var groups []models.NoteGroup
 

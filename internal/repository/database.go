@@ -9,28 +9,26 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-
-
 type Database struct {
 	DB *gorm.DB
 }
 
-func NewDatabse(connStr string) (*Database, error){
+func NewDatabse(connStr string) (*Database, error) {
 	db, err := gorm.Open(sqlite.Open(connStr), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to connect to database %w", err);
+		return nil, fmt.Errorf("Failed to connect to database %w", err)
 	}
 
-	dbConn, err := db.DB();
+	dbConn, err := db.DB()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get underlying database %w", err);
+		return nil, fmt.Errorf("Failed to get underlying database %w", err)
 	}
 
-	dbConn.SetMaxOpenConns(10);
-	dbConn.SetMaxIdleConns(5);
+	dbConn.SetMaxOpenConns(10)
+	dbConn.SetMaxIdleConns(5)
 
 	if _, err = dbConn.Exec("PRAGMA journal_mode=WAL"); err != nil {
 		return nil, fmt.Errorf("Failed to enable WAL mode %w", err)
@@ -47,7 +45,7 @@ func NewDatabse(connStr string) (*Database, error){
 
 	fmt.Println("database initialised successfully!!")
 
-	return &Database{DB: db}, nil;
+	return &Database{DB: db}, nil
 }
 
 func (d *Database) Close() error {

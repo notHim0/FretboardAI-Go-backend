@@ -11,12 +11,12 @@ type AnalysisRepository struct {
 	db *gorm.DB
 }
 
-//creates a new analysis repository
+// creates a new analysis repository
 func NewAnalysisRepository(db *gorm.DB) *AnalysisRepository {
 	return &AnalysisRepository{db: db}
 }
 
-//creates a new analysis 
+// creates a new analysis
 func (r *AnalysisRepository) Create(analysis *models.Analysis) error {
 	if err := r.db.Create(analysis).Error; err != nil {
 		return fmt.Errorf("failed to create analysis: %w", err)
@@ -24,7 +24,7 @@ func (r *AnalysisRepository) Create(analysis *models.Analysis) error {
 	return nil
 }
 
-//GetById retrieves a analysis by Id
+// GetById retrieves a analysis by Id
 func (r *AnalysisRepository) GetById(id uint) (*models.Analysis, error) {
 	var analysis models.Analysis
 
@@ -38,8 +38,8 @@ func (r *AnalysisRepository) GetById(id uint) (*models.Analysis, error) {
 	return &analysis, nil
 }
 
-//GetByJobId retrieves a analysis by jobId
-func (r *AnalysisRepository) GetByJobId(jobId uint) (*models.Analysis, error){
+// GetByJobId retrieves a analysis by jobId
+func (r *AnalysisRepository) GetByJobId(jobId uint) (*models.Analysis, error) {
 	var analysis models.Analysis
 
 	if err := r.db.Where("job_id = ?", jobId).Preload("Job").First(&analysis).Error; err != nil {
@@ -52,7 +52,7 @@ func (r *AnalysisRepository) GetByJobId(jobId uint) (*models.Analysis, error){
 	return &analysis, nil
 }
 
-//Update updates the analysis
+// Update updates the analysis
 func (r *AnalysisRepository) Update(analysis *models.Analysis) error {
 	if err := r.db.Save(analysis).Error; err != nil {
 		return fmt.Errorf("failed to update analysis: %w", err)
@@ -64,5 +64,5 @@ func (r *AnalysisRepository) Delete(id uint) error {
 	if err := r.db.Delete(&models.Analysis{}, id).Error; err != nil {
 		return fmt.Errorf("failed to delete analysis: %w", err)
 	}
-	return nil 
+	return nil
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nothim0/fretboardAI-Go-backend/config"
 	"github.com/nothim0/fretboardAI-Go-backend/internal/repository"
+	"github.com/nothim0/fretboardAI-Go-backend/pkg/llm_client"
+	"github.com/nothim0/fretboardAI-Go-backend/pkg/python_client"
 )
 
 func main() {
@@ -39,11 +41,25 @@ func main() {
 	analysisRepo := repository.NewAnalysisRepository(db.DB)
 	noteRepo := repository.NewNoteRepository(db.DB)
 	noteGroupRepo := repository.NewNoteRepository(db.DB)
-	
+
 	log.Println("Repositories initialised")
 
-	// TODO: Initialize Python client (Step 3)
-	// TODO: Initialize LLM client (Step 4)
+	//Initailise python client
+	pythonClient := python_client.NewClient(cfg.PythonServiceURL)
+	if err := pythonClient.HealthCheck(); err != nil {
+		log.Printf("WARNING: Python service unavailable: %v", err)
+		log.Printf("WARNING: Transcription will fail until Python service is running on %s", cfg.PythonServiceURL)
+	} else {
+		log.Println("Python service connected successfully")
+	}
+	//Initialize LLM client
+	llmClient := llm_client.NewClient(cfg.OpenAIAPIKey, cfg.OpenAIModel)
+	if cfg.OpenAIAPIKey == "" {
+		log.Printf("WARNING: OpenAI API key is not set - music analysis will fail")
+	} else {
+		log.Printf("LLM Client initialised successfully")
+	}
+
 	// TODO: Initialize service layer (Step 5)
 	// TODO: Initialize handlers (Step 6)
 
@@ -62,17 +78,21 @@ func main() {
 
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"status": "200",
+			"status":  "200",
 			"message": "FretBoardAI is running...",
 		})
 	})
 
+	api := router.Group("/api")
+	{
+		_ = api
+	}
 
 	_ = jobRepo
 	_ = analysisRepo
 	_ = noteRepo
 	_ = noteGroupRepo
-
+	_ = llmClient
 
 	log.Printf("Starting server on port %s...", cfg.Port)
 

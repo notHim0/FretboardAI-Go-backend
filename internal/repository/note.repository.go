@@ -7,12 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
-//handles database operations for note repository
+// handles database operations for note repository
 type NoteRepository struct {
 	db *gorm.DB
 }
 
-//creates a new note repository
+// creates a new note repository
 func NewNoteRepository(db *gorm.DB) *NoteRepository {
 	return &NoteRepository{db: db}
 }
@@ -22,27 +22,27 @@ func (r *NoteRepository) CreateInBulk(notes []models.Note) error {
 		return nil
 	}
 
-	err := r.db.Transaction(func (tx *gorm.DB) error {
+	err := r.db.Transaction(func(tx *gorm.DB) error {
 
-	var batchsize int = 100
-	for  i := 0; i<len(notes); i+=batchsize {
-		end := min(i + batchsize, len(notes))
+		var batchsize int = 100
+		for i := 0; i < len(notes); i += batchsize {
+			end := min(i+batchsize, len(notes))
 
-		if err := tx.Create(notes[i:end]).Error; err != nil {
-			return err
+			if err := tx.Create(notes[i:end]).Error; err != nil {
+				return err
+			}
+
 		}
-
-	}
-	return nil
-})
+		return nil
+	})
 
 	if err != nil {
 		return fmt.Errorf("failed to create notes in bulk: %w", err)
 	}
-	return nil 
+	return nil
 }
 
-//GetByAnalysisId lists all the notes for the given analysis
+// GetByAnalysisId lists all the notes for the given analysis
 func (r *NoteRepository) GetByAnalysisId(analysisId uint) ([]models.Note, error) {
 	var notes []models.Note
 
@@ -53,8 +53,8 @@ func (r *NoteRepository) GetByAnalysisId(analysisId uint) ([]models.Note, error)
 	return notes, nil
 }
 
-//GetByGroupId lists all the notes for the given group
-func (r *NoteRepository) GetByGroupId(groupId uint) ([]models.Note, error){
+// GetByGroupId lists all the notes for the given group
+func (r *NoteRepository) GetByGroupId(groupId uint) ([]models.Note, error) {
 	var notes []models.Note
 
 	if err := r.db.Where("group_id = ?", groupId).Order("time ASC").Find(&notes).Error; err != nil {
@@ -64,7 +64,7 @@ func (r *NoteRepository) GetByGroupId(groupId uint) ([]models.Note, error){
 	return notes, nil
 }
 
-//GetByTimeRange lists all notes by in the time range given
+// GetByTimeRange lists all notes by in the time range given
 func (r *NoteRepository) GetByTimeRange(analysisId uint, startTime, endTime float64) ([]models.Note, error) {
 	var notes []models.Note
 
@@ -75,8 +75,7 @@ func (r *NoteRepository) GetByTimeRange(analysisId uint, startTime, endTime floa
 	return notes, nil
 }
 
-
-//UpdateGroupId updates the group id of a note
+// UpdateGroupId updates the group id of a note
 func (r *NoteRepository) UpdateGroupId(noteId uint, groupId *uint) error {
 	if err := r.db.Model(&models.Note{}).Where("id = ? ", noteId).Update("group_id", groupId).Error; err != nil {
 		return fmt.Errorf("failed to update group id: %w", err)
@@ -86,12 +85,12 @@ func (r *NoteRepository) UpdateGroupId(noteId uint, groupId *uint) error {
 
 }
 
-//Delete deletes a note by note id
+// Delete deletes a note by note id
 func (r *NoteRepository) Delete(id uint) error {
 	if err := r.db.Delete(&models.Note{}, id).Error; err != nil {
 		return fmt.Errorf("failed to delete note: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -103,7 +102,7 @@ func (r *NoteRepository) DeleteByAnalysisID(analysisID uint) error {
 	return nil
 }
 
-//CountByAnalysisId count total number of notes in a analysis
+// CountByAnalysisId count total number of notes in a analysis
 func (r *NoteRepository) CountByAnalysisId(analysisId uint) (int64, error) {
 	var count int64
 

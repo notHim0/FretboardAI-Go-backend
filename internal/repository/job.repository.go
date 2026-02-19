@@ -8,32 +8,31 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type JobRepository struct {
 	db *gorm.DB
 }
 
-//creates a new Job repository
-func NewJobRepository (db *gorm.DB)  *JobRepository{
+// creates a new Job repository
+func NewJobRepository(db *gorm.DB) *JobRepository {
 	return &JobRepository{db: db}
 }
 
-//creates a new Job (with status as "pending")
-func (r *JobRepository) Create(filename string) (*models.Job, error){
+// creates a new Job (with status as "pending")
+func (r *JobRepository) Create(filename string) (*models.Job, error) {
 	var job *models.Job = &models.Job{
-		Filename: filename,
-		Status: "pending",
+		Filename:  filename,
+		Status:    "pending",
 		CreatedAt: time.Now(),
 	}
 
 	if err := r.db.Create(job).Error; err != nil {
-		return nil, fmt.Errorf("Unable to create job: %w", err);
+		return nil, fmt.Errorf("Unable to create job: %w", err)
 	}
 
-	return job,nil
+	return job, nil
 }
 
-//fetches a job by its Id
+// fetches a job by its Id
 func (r *JobRepository) GetById(id uint) (*models.Job, error) {
 	var job models.Job
 	if err := r.db.First(&job, id).Error; err != nil {
@@ -46,7 +45,7 @@ func (r *JobRepository) GetById(id uint) (*models.Job, error) {
 	return &job, nil
 }
 
-//updates the status feild("pending", "completed", "failed") of the job
+// updates the status feild("pending", "completed", "failed") of the job
 func (r *JobRepository) UpdateStatus(status string, id uint, errMsg error) error {
 	updates := map[string]interface{}{
 		"status": status,
@@ -67,7 +66,7 @@ func (r *JobRepository) UpdateStatus(status string, id uint, errMsg error) error
 	return nil
 }
 
-//deletes a job
+// deletes a job
 func (r *JobRepository) Delete(id uint) error {
 	if err := r.db.Delete(&models.Job{}, id).Error; err != nil {
 		return fmt.Errorf("failed to delete job: %w", err)
@@ -76,7 +75,7 @@ func (r *JobRepository) Delete(id uint) error {
 	return nil
 }
 
-//lists all entries of job present in database
+// lists all entries of job present in database
 func (r *JobRepository) List(offset int, limit int) ([]models.Job, error) {
 	var jobs []models.Job
 
@@ -87,7 +86,7 @@ func (r *JobRepository) List(offset int, limit int) ([]models.Job, error) {
 	return jobs, nil
 }
 
-//lists only the pending jobs present in database
+// lists only the pending jobs present in database
 func (r *JobRepository) GetPendingJobs() ([]models.Job, error) {
 	var pendingJobs []models.Job
 

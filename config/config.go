@@ -21,13 +21,13 @@ type Config struct {
 	OpenAIModel  string
 
 	// File upload settings
-	MaxFileSize      int64  // in bytes
-	MaxDuration      int    // in seconds
-	UploadDir        string
+	MaxFileSize       int64 // in bytes
+	MaxDuration       int   // in seconds
+	UploadDir         string
 	ProcessedAudioDir string
 
 	// Processing settings
-	ChordTimeThreshold float64 // milliseconds to group notes as chord
+	ChordTimeThreshold     float64 // milliseconds to group notes as chord
 	LowConfidenceThreshold float64 // notes below this are flagged
 }
 
@@ -49,7 +49,7 @@ func LoadConfig() *Config {
 
 		// File upload
 		MaxFileSize:       getEnvInt64("MAX_FILE_SIZE", 50*1024*1024), // 50MB default
-		MaxDuration:       getEnvInt("MAX_DURATION", 600),              // 10 minutes default
+		MaxDuration:       getEnvInt("MAX_DURATION", 600),             // 10 minutes default
 		UploadDir:         getEnv("UPLOAD_DIR", "./uploads"),
 		ProcessedAudioDir: getEnv("PROCESSED_AUDIO_DIR", "./processed"),
 

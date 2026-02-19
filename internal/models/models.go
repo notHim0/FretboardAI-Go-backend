@@ -40,10 +40,10 @@ type Note struct {
 	GroupID    *uint    `json:"group_id,omitempty" gorm:"index"` // Links simultaneous notes
 
 	// Guitar technique detection
-	Technique     string  `json:"technique"`                                  // "normal", "hammer_on", "pull_off", "slide", "bend", "vibrato", "tap", "harmonic"
+	Technique     string  `json:"technique"`                                 // "normal", "hammer_on", "pull_off", "slide", "bend", "vibrato", "tap", "harmonic"
 	TechniqueData *string `json:"technique_data,omitempty" gorm:"type:text"` // JSON with technique-specific data (TechniqueDetails struct)
-	Attack        string  `json:"attack"`                                     // "pick", "finger", "thumb", "hybrid", "tap", "slap"
-	Dynamics      string  `json:"dynamics"`                                   // "soft", "medium", "hard", "accent"
+	Attack        string  `json:"attack"`                                    // "pick", "finger", "thumb", "hybrid", "tap", "slap"
+	Dynamics      string  `json:"dynamics"`                                  // "soft", "medium", "hard", "accent"
 }
 
 // TechniqueDetails contains technique-specific metadata (stored as JSON in Note.TechniqueData)
@@ -77,16 +77,16 @@ type NoteGroup struct {
 	ID         uint     `json:"id" gorm:"primaryKey"`
 	AnalysisID uint     `json:"analysis_id" gorm:"not null;index"`
 	Analysis   Analysis `json:"-" gorm:"foreignKey:AnalysisID"`
-	Time       float64  `json:"time"`       // seconds from start
-	Duration   float64  `json:"duration"`   // group duration in seconds
-	GroupType  string   `json:"group_type"` // "chord", "arpeggio", "strum", "double_stop", "power_chord", "palm_mute"
-	Name       string   `json:"name"`       // "G Major", "E5 Power Chord", "Fingerpick Pattern", "Am Arpeggio"
+	Time       float64  `json:"time"`                            // seconds from start
+	Duration   float64  `json:"duration"`                        // group duration in seconds
+	GroupType  string   `json:"group_type"`                      // "chord", "arpeggio", "strum", "double_stop", "power_chord", "palm_mute"
+	Name       string   `json:"name"`                            // "G Major", "E5 Power Chord", "Fingerpick Pattern", "Am Arpeggio"
 	Notes      []Note   `json:"notes" gorm:"foreignKey:GroupID"` // All notes in this group
-	Confidence float64  `json:"confidence"`                       // detection confidence (0-1)
+	Confidence float64  `json:"confidence"`                      // detection confidence (0-1)
 
 	// Playing technique for the group
-	PlayingStyle string `json:"playing_style"`        // "fingerpicking", "strumming", "hybrid_picking", "sweep_picking", "alternate_picking", "economy_picking"
-	Tempo        *int   `json:"tempo,omitempty"`      // BPM for this section (if detected)
+	PlayingStyle string `json:"playing_style"`   // "fingerpicking", "strumming", "hybrid_picking", "sweep_picking", "alternate_picking", "economy_picking"
+	Tempo        *int   `json:"tempo,omitempty"` // BPM for this section (if detected)
 }
 
 // UploadResponse is returned immediately after file upload
