@@ -14,17 +14,17 @@ import (
 const openAIURL = "https://api.openai.com/v1/chat/completions"
 
 type Client struct {
-	apikey string
+	apikey     string
 	httpClient *http.Client
-	model string
+	model      string
 	maxRetries int
 	retryDelay time.Duration
 }
 
-func NewClient(apikey, model string) *Client{
+func NewClient(apikey, model string) *Client {
 	return &Client{
 		apikey: apikey,
-		model: model,
+		model:  model,
 		httpClient: &http.Client{
 			Timeout: 60 * time.Second,
 		},
@@ -47,7 +47,6 @@ func (c *Client) AnalyzeNotes(notes []NoteInput, groups []GroupInput) (*Analysis
 
 	userPrompt := buildUserPrompt(notesContexts, groupContexts)
 
-
 	request := openAIRequest{
 		Model: c.model,
 		Messages: []openAIMessage{
@@ -55,7 +54,7 @@ func (c *Client) AnalyzeNotes(notes []NoteInput, groups []GroupInput) (*Analysis
 			{Role: "user", Content: userPrompt},
 		},
 		Temperature: 0.2,
-		MaxTokens: 2000,
+		MaxTokens:   2000,
 	}
 
 	//Attempt with retries and exponential backoff
@@ -83,8 +82,7 @@ func (c *Client) AnalyzeNotes(notes []NoteInput, groups []GroupInput) (*Analysis
 	return nil, fmt.Errorf("LLM Analysis failed after %d attempts: %w", c.maxRetries, lastErr)
 }
 
-
-//callOpenAI makes a single request to OpenAI API
+// callOpenAI makes a single request to OpenAI API
 func (c *Client) callOpenAI(request openAIRequest) (*AnalysisResult, error) {
 	body, err := json.Marshal(request)
 	if err != nil {

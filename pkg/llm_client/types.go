@@ -8,13 +8,14 @@ type AnalysisResponse struct {
 // NoteContext is a simplified note representation for the LLM prompt
 // We don't send the full Note model - only what the LLM needs to reason about
 type NoteContext struct {
-	Time      float64 `json:"time"`       // seconds from start
-	Pitch     int     `json:"pitch"`      // MIDI number
-	NoteName  string  `json:"note_name"`  // human readable: "E4", "G#3"
-	Duration  float64 `json:"duration"`   // seconds
-	Fret      int     `json:"fret"`       // already mapped by Go
-	String    int     `json:"string"`     // already mapped by Go
+	Time     float64 `json:"time"`      // seconds from start
+	Pitch    int     `json:"pitch"`     // MIDI number
+	NoteName string  `json:"note_name"` // human readable: "E4", "G#3"
+	Duration float64 `json:"duration"`  // seconds
+	Fret     int     `json:"fret"`      // already mapped by Go
+	String   int     `json:"string"`    // already mapped by Go
 }
+
 // GroupContext is a simplified note group for the LLM prompt
 type GroupContext struct {
 	Time      float64  `json:"time"`
@@ -25,10 +26,10 @@ type GroupContext struct {
 
 // AnalysisResult is what we expect back from the LLM
 type AnalysisResult struct {
-	KeySignature string             `json:"key_signature"` // "E Minor", "G Major"
-	ScaleType    string             `json:"scale_type"`    // "Minor Pentatonic", "Dorian"
-	Explanation  string             `json:"explanation"`   // full theory explanation
-	Confidence   float64            `json:"confidence"`    // LLM self-reported confidence 0-1
+	KeySignature string                `json:"key_signature"` // "E Minor", "G Major"
+	ScaleType    string                `json:"scale_type"`    // "Minor Pentatonic", "Dorian"
+	Explanation  string                `json:"explanation"`   // full theory explanation
+	Confidence   float64               `json:"confidence"`    // LLM self-reported confidence 0-1
 	Techniques   []TechniqueSuggestion `json:"techniques"`
 }
 
@@ -52,7 +53,7 @@ type openAIRequest struct {
 
 // openAIMessage is a single message in the OpenAI conversation
 type openAIMessage struct {
-	Role    string `json:"role"`    // "system" or "user"
+	Role    string `json:"role"` // "system" or "user"
 	Content string `json:"content"`
 }
 

@@ -46,7 +46,7 @@ func (r *JobRepository) GetById(id uint) (*models.Job, error) {
 }
 
 // updates the status feild("pending", "completed", "failed") of the job
-func (r *JobRepository) UpdateStatus(status string, id uint, errMsg error) error {
+func (r *JobRepository) UpdateStatus(status string, id uint, errMsg string) error {
 	updates := map[string]interface{}{
 		"status": status,
 	}
@@ -56,7 +56,7 @@ func (r *JobRepository) UpdateStatus(status string, id uint, errMsg error) error
 		updates["completed_at"] = &now
 	}
 
-	if errMsg != nil {
+	if errMsg != "" {
 		updates["error_message"] = errMsg
 	}
 
