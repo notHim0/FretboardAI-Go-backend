@@ -8,7 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nothim0/fretboardAI-Go-backend/config"
+	"github.com/nothim0/fretboardAI-Go-backend/internal/handler"
 	"github.com/nothim0/fretboardAI-Go-backend/internal/repository"
+	"github.com/nothim0/fretboardAI-Go-backend/internal/service"
 	"github.com/nothim0/fretboardAI-Go-backend/pkg/llm_client"
 	"github.com/nothim0/fretboardAI-Go-backend/pkg/python_client"
 )
@@ -37,10 +39,10 @@ func main() {
 
 	log.Println("Database connnect succesfully")
 
-	jobRepo := repository.NewAnalysisRepository(db.DB)
+	jobRepo := repository.NewJobRepository(db.DB)
 	analysisRepo := repository.NewAnalysisRepository(db.DB)
 	noteRepo := repository.NewNoteRepository(db.DB)
-	noteGroupRepo := repository.NewNoteRepository(db.DB)
+	noteGroupRepo := repository.NewNoteGroupRepository(db.DB)
 
 	log.Println("Repositories initialised")
 
@@ -60,11 +62,34 @@ func main() {
 		log.Printf("LLM Client initialised successfully")
 	}
 
-	// TODO: Initialize service layer (Step 5)
+	//Initialize service layer
+	transcriptionService := service.NewTranscriptionService(
+		jobRepo,
+		analysisRepo,
+		noteRepo,
+		noteGroupRepo,
+		pythonClient,
+		llmClient,
+		cfg,
+	)
+
+	log.Println("Transcription service initialized")
 	// TODO: Initialize handlers (Step 6)
 
+	//Initialize handlers
+	transcriptionHandler := handler.NewTranscriptionHandler(
+		transcriptionService,
+		jobRepo,
+		cfg,
+	)
+
+	log.Println("Handlers initialised")
 	router := gin.Default()
 
+	//set amx multipart memory(for file uploads)
+	router.MaxMultipartMemory = cfg.MaxFileSize
+
+	//CORS middleware config
 	router.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -85,16 +110,31 @@ func main() {
 
 	api := router.Group("/api")
 	{
-		_ = api
+		// Upload audio file for transcription
+		api.POST("/upload", transcriptionHandler.UploadAudio)
+
+		// Job management
+		api.GET("/jobs", transcriptionHandler.GetJobsList)
+		api.GET("/jobs/:id/status", transcriptionHandler.GetJobStatus)
+		api.GET("/jobs/:id/result", transcriptionHandler.GetJobResult)
+		api.DELETE("/jobs/:id", transcriptionHandler.DeleteJob)
 	}
 
-	_ = jobRepo
-	_ = analysisRepo
-	_ = noteRepo
-	_ = noteGroupRepo
-	_ = llmClient
+	//static file serving
+	router.Static("/audio", cfg.ProcessedAudioDir)
+
+	log.Println("Routes registered:")
+	log.Println("  POST   /api/upload              - Upload audio file")
+	log.Println("  GET    /api/jobs                - List all jobs")
+	log.Println("  GET    /api/jobs/:id/status     - Get job status")
+	log.Println("  GET    /api/jobs/:id/result     - Get job result")
+	log.Println("  DELETE /api/jobs/:id            - Delete job")
+	log.Println("  GET    /health                  - Health check")
+	log.Println("  GET    /audio/*filepath         - Serve processed audio")
 
 	log.Printf("Starting server on port %s...", cfg.Port)
+	log.Printf("Upload directory: %s", cfg.UploadDir)
+	log.Printf("Processed audio directory: %s", cfg.ProcessedAudioDir)
 
 	go func() {
 		if err := router.Run(":" + cfg.Port); err != nil {
@@ -102,6 +142,7 @@ func main() {
 		}
 	}()
 
+	//for gracefull shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
