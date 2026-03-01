@@ -1,0 +1,16 @@
+# Web framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+python-multipart>=0.0.6
+
+# Audio processing
+spleeter
+basic-pitch
+librosa
+soundfile
+numpy
+
+# Utilities
+pydantic
+
+tensorflow>=2.0.0
