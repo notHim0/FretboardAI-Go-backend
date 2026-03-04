@@ -3,14 +3,22 @@ fastapi>=0.100.0
 uvicorn[standard]>=0.23.0
 python-multipart>=0.0.6
 
-# Audio processing
-spleeter
-basic-pitch
-librosa
-soundfile
-numpy
+# Audio processing - pinned for compatibility
+spleeter==2.4.0
+basic-pitch==0.4.0
+librosa==0.10.1
+soundfile==0.12.1
+numpy>=1.23.5,<2.0.0
+
+# MIDI file creation
+mido>=1.2.10
 
 # Utilities
-pydantic
+pydantic>=2.0.0
+requests>=2.28.0
 
-tensorflow>=2.0.0
+# TensorFlow - 2.9.1 is the sweet spot for Python 3.10 and Spleeter 2.4.0
+tensorflow==2.9.1
+
+# ONNX for Basic Pitch backup (optional but recommended)
+onnxruntime

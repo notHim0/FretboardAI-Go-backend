@@ -5,12 +5,27 @@ This service handles:
 1. Audio source separation using Spleeter (extract guitar stem)
 2. Audio-to-MIDI transcription using Basic Pitch
 """
-
 import os
+# Force TensorFlow to ignore the GPU and use the Ryzen CPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+# Suppress the "libcudart" and "numa" warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import time
 import logging
 from pathlib import Path
 from typing import List
+
+# GPU Memory Management - MUST BE FIRST
+import tensorflow as tf
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        print("[GPU] Dynamic memory growth enabled")
+    except RuntimeError as e:
+        print(f"[GPU] Error setting memory growth: {e}")
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,7 +61,7 @@ transcriber = None
 
 # Request/Response models
 class TranscribeRequest(BaseModel):
-    file_path: str  # Absolute path to the uploaded audio file
+    file_path: str
 
 
 class RawNote(BaseModel):
@@ -88,7 +103,6 @@ async def startup_event():
     logger.info("AudioTranscriber initialized successfully")
 
 
-# Endpoints
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint"""
@@ -106,26 +120,16 @@ async def health_check():
 
 @app.post("/transcribe", response_model=TranscribeResponse)
 async def transcribe_audio(request: TranscribeRequest):
-    """
-    Transcribe audio file to MIDI notes
-    
-    Process:
-    1. Load audio file
-    2. Separate guitar stem using Spleeter
-    3. Transcribe guitar stem to MIDI using Basic Pitch
-    4. Return notes as JSON
-    """
+    """Transcribe audio file to MIDI notes"""
     if transcriber is None:
         raise HTTPException(status_code=503, detail="Service is still starting up")
     
     logger.info(f"Transcription request received for: {request.file_path}")
     
-    # Validate file exists
     if not os.path.exists(request.file_path):
         logger.error(f"File not found: {request.file_path}")
         raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
     
-    # Validate file extension
     valid_extensions = ['.mp3', '.wav', '.m4a', '.flac', '.ogg']
     file_ext = Path(request.file_path).suffix.lower()
     if file_ext not in valid_extensions:
@@ -137,14 +141,10 @@ async def transcribe_audio(request: TranscribeRequest):
     
     try:
         start_time = time.time()
-        
-        # Run the transcription pipeline
         result = transcriber.transcribe(request.file_path)
-        
         processing_time = time.time() - start_time
         logger.info(f"Transcription completed in {processing_time:.2f}s. Notes detected: {len(result['notes'])}")
         
-        # Build response
         notes = [
             RawNote(
                 time=note['time'],
