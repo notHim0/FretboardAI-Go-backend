@@ -41,3 +41,13 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+
+#python service
+python_service/__pycache__/
+python_service/*.py[cod]
+python_service/*$py.class
+venv/
+.venv/
+env/
+python_service/venv/
+python_service/pretrained_models
