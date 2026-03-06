@@ -7,7 +7,6 @@
 - **Orchestrator:** Go (Golang)
 - **AI Microservice:** Python 3.10+ (FastAPI, TensorFlow)
 - **AI Models:** Spleeter (Source Separation) & Basic Pitch (Pitch Detection)
-- **Blockchain (Optional):** Solana/Casper integration for decentralized payments.
 
 ---
 
