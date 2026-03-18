@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const openAIURL = "https://api.openai.com/v1/chat/completions"
+const baseURL = "https://api.anthropic.com/v1/messages"
 
 type Client struct {
 	apikey     string
@@ -35,7 +35,7 @@ func NewClient(apikey, model string) *Client {
 
 func (c *Client) AnalyzeNotes(notes []NoteInput, groups []GroupInput) (*AnalysisResult, error) {
 	if c.apikey == "" {
-		return nil, fmt.Errorf("OpenAPI key is not set")
+		return nil, fmt.Errorf("AnthropicAPI key is not set")
 	}
 
 	if len(notes) == 0 {
@@ -47,9 +47,9 @@ func (c *Client) AnalyzeNotes(notes []NoteInput, groups []GroupInput) (*Analysis
 
 	userPrompt := buildUserPrompt(notesContexts, groupContexts)
 
-	request := openAIRequest{
+	request := anthropicRequest{
 		Model: c.model,
-		Messages: []openAIMessage{
+		Messages: []anthropicMessage{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: userPrompt},
 		},
@@ -62,7 +62,7 @@ func (c *Client) AnalyzeNotes(notes []NoteInput, groups []GroupInput) (*Analysis
 	for attempt := 1; attempt <= c.maxRetries; attempt++ {
 		log.Printf("[LLM Client] Analysis attempt %d/%d", attempt, c.maxRetries)
 
-		result, err := c.callOpenAI(request)
+		result, err := c.callAnthropic(request)
 		if err != nil {
 			lastErr = err
 			log.Printf("[LLM Client] Attempt %d failed: %v", attempt, err)
@@ -82,52 +82,53 @@ func (c *Client) AnalyzeNotes(notes []NoteInput, groups []GroupInput) (*Analysis
 	return nil, fmt.Errorf("LLM Analysis failed after %d attempts: %w", c.maxRetries, lastErr)
 }
 
-// callOpenAI makes a single request to OpenAI API
-func (c *Client) callOpenAI(request openAIRequest) (*AnalysisResult, error) {
+// callanthropic makes a single request to anthropic API
+func (c *Client) callAnthropic(request anthropicRequest) (*AnalysisResult, error) {
 	body, err := json.Marshal(request)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal OpenAI request: %w", err)
+		return nil, fmt.Errorf("failed to marshal anthropic request: %w", err)
 	}
-	req, err := http.NewRequest("POST", openAIURL, bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", baseURL, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.apikey)
+	req.Header.Set("x-api-key", c.apikey)
+	req.Header.Set("anthropic-version", "2023-06-01")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("OpenAI request failed: %w", err)
+		return nil, fmt.Errorf("anthropic request failed: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read OpenAI response: %w", err)
+		return nil, fmt.Errorf("failed to read anthropic response: %w", err)
 	}
 
-	//Parse the OpenAi response envelope
-	var openAIResp openAIResponse
-	if err := json.Unmarshal(responseBody, &openAIResp); err != nil {
-		return nil, fmt.Errorf("failed to parse OpenAI response: %w", err)
+	//Parse the anthropic response envelope
+	var anthropicResp anthropicResponse
+	if err := json.Unmarshal(responseBody, &anthropicResp); err != nil {
+		return nil, fmt.Errorf("failed to parse anthropic response: %w", err)
 	}
 
 	//check for api level errors(wrong key, rate limit, etc.)
-	if openAIResp.Error != nil {
-		return nil, fmt.Errorf("OpenAI API error (%s): %s", openAIResp.Error.Type, openAIResp.Error.Message)
+	if anthropicResp.Error != nil {
+		return nil, fmt.Errorf("anthropic API error (%s): %s", anthropicResp.Error.Type, anthropicResp.Error.Message)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("OpenAI returned status %d: %s", resp.StatusCode, string(responseBody))
+		return nil, fmt.Errorf("anthropic returned status %d: %s", resp.StatusCode, string(responseBody))
 	}
 
-	if len(openAIResp.Choices) == 0 {
-		return nil, fmt.Errorf("OpenAI returned no choices")
+	if len(anthropicResp.Choices) == 0 {
+		return nil, fmt.Errorf("anthropic returned no choices")
 	}
 
-	content := openAIResp.Choices[0].Message.Content
+	content := anthropicResp.Choices[0].Message.Content
 	return parseAnalysisResult(content)
 }
 

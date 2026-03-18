@@ -60,7 +60,7 @@ func (r *JobRepository) UpdateStatus(status string, id uint, errMsg string) erro
 		updates["error_message"] = errMsg
 	}
 
-	if err := r.db.Model(&models.Job{}).Where("id: ?", id).Updates(updates).Error; err != nil {
+	if err := r.db.Model(&models.Job{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 		return fmt.Errorf("failed to update status: %w", err)
 	}
 	return nil

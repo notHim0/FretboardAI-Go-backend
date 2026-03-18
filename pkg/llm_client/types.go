@@ -43,22 +43,22 @@ type TechniqueSuggestion struct {
 	NoteIndices []int   `json:"note_indices"` // which notes in the input this applies to
 }
 
-// openAIRequest is the raw OpenAI API request body
-type openAIRequest struct {
+// anthropicRequest is the raw anthropic API request body
+type anthropicRequest struct {
 	Model       string          `json:"model"`
-	Messages    []openAIMessage `json:"messages"`
+	Messages    []anthropicMessage `json:"messages"`
 	Temperature float64         `json:"temperature"`
 	MaxTokens   int             `json:"max_tokens"`
 }
 
-// openAIMessage is a single message in the OpenAI conversation
-type openAIMessage struct {
+// anthropicMessage is a single message in the anthropic conversation
+type anthropicMessage struct {
 	Role    string `json:"role"` // "system" or "user"
 	Content string `json:"content"`
 }
 
-// openAIResponse is the raw OpenAI API response
-type openAIResponse struct {
+// anthropicResponse is the raw anthropic API response
+type anthropicResponse struct {
 	Choices []struct {
 		Message struct {
 			Content string `json:"content"`

@@ -1,8 +1,11 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 // Config holds all application configuration
@@ -17,14 +20,15 @@ type Config struct {
 	PythonServiceURL string
 
 	// OpenAI settings
-	OpenAIAPIKey string
-	OpenAIModel  string
+	AnthropicAPIKey string
+	AnthropicModel  string
 
 	// File upload settings
 	MaxFileSize       int64 // in bytes
 	MaxDuration       int   // in seconds
 	UploadDir         string
 	ProcessedAudioDir string
+	AbsDirPath 		string
 
 	// Processing settings
 	ChordTimeThreshold     float64 // milliseconds to group notes as chord
@@ -33,6 +37,10 @@ type Config struct {
 
 // LoadConfig loads configuration from environment variables with defaults
 func LoadConfig() *Config {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("env file not loaded")
+	}
 	return &Config{
 		// Server
 		Port: getEnv("PORT", "8080"),
@@ -44,14 +52,15 @@ func LoadConfig() *Config {
 		PythonServiceURL: getEnv("PYTHON_SERVICE_URL", "http://localhost:5000"),
 
 		// OpenAI
-		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
-		OpenAIModel:  getEnv("OPENAI_MODEL", "gpt-4o"),
+		AnthropicAPIKey: getEnv("ANTHROPIC_API_KEY", ""),
+		AnthropicModel:  getEnv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
 
 		// File upload
 		MaxFileSize:       getEnvInt64("MAX_FILE_SIZE", 50*1024*1024), // 50MB default
 		MaxDuration:       getEnvInt("MAX_DURATION", 600),             // 10 minutes default
 		UploadDir:         getEnv("UPLOAD_DIR", "./uploads"),
 		ProcessedAudioDir: getEnv("PROCESSED_AUDIO_DIR", "./processed"),
+		AbsDirPath:		getEnv("ABS_DIR_PATH", "/home/akera/Projects/personal_projects/fretboardAI/fretboardAI-Go-backend/"),
 
 		// Processing
 		ChordTimeThreshold:     getEnvFloat64("CHORD_TIME_THRESHOLD", 50.0), // 50ms default

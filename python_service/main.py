@@ -90,7 +90,6 @@ class HealthResponse(BaseModel):
     status: str
     message: str
 
-
 @app.on_event("startup")
 async def startup_event():
     """Initialize transcriber on startup"""

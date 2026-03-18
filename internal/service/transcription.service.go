@@ -51,7 +51,6 @@ func (s *TranscriptionService) ProcessTranscription(jobID uint, audioFilePath st
 	if err := s.jobRepo.UpdateStatus("processing", jobID, ""); err != nil {
 		return fmt.Errorf("failed to update job status: %w", err)
 	}
-
 	//call python service (spleeter + basic pitch)
 	log.Printf("[Service] Step 1/5: Calling Python service for audio transcription")
 	transcribeResp, err := s.pythonClient.TranscribeAudio(audioFilePath)

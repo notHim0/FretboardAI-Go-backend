@@ -55,9 +55,9 @@ func main() {
 		log.Println("Python service connected successfully")
 	}
 	//Initialize LLM client
-	llmClient := llm_client.NewClient(cfg.OpenAIAPIKey, cfg.OpenAIModel)
-	if cfg.OpenAIAPIKey == "" {
-		log.Printf("WARNING: OpenAI API key is not set - music analysis will fail")
+	llmClient := llm_client.NewClient(cfg.AnthropicAPIKey, cfg.AnthropicModel)
+	if cfg.AnthropicAPIKey == "" {
+		log.Printf("WARNING: Anthropic API key is not set - music analysis will fail")
 	} else {
 		log.Printf("LLM Client initialised successfully")
 	}
